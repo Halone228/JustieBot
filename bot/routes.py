@@ -86,6 +86,7 @@ async def start(message: types.Message, session: AsyncSession, *args, **kwargs):
     )
     await message.answer(
         text=config['texts']['start'],
+        reply_markup=builder.as_markup()
     )
 
 
