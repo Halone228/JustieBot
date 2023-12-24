@@ -96,7 +96,9 @@ async def account_info(message: types.Message, session: AsyncSession, *args, **k
 async def show_skins(message: types.Message):
     skins: list[dict[str, int]] = config['data']['skins']
     builder = InlineKeyboardBuilder()
+    SkinsStorage.fill_urls(skins)
     for i in skins:
+        i = list(i.keys())[0]
         i = await SkinsStorage.get_skin(i)
         builder.row(InlineKeyboardButton(
             text=i.item_name,

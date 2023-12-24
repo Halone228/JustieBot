@@ -21,12 +21,23 @@ class SkinsStorage:
     counter = 0
     url_to_id = dict()
     id_to_url = dict()
+    url_to_price = dict()
 
     @classmethod
-    def get_id_by_url(cls, url: dict[str, int]):
-        if list(url.keys())[0] not in cls.url_to_id:
+    def fill_urls(cls, data: list[dict[str, int]]) -> None:
+        for i in data:
+            key, value = list(i.keys())[0], list(i.values())[0]
+            cls.url_to_price[key] = value
+
+    @classmethod
+    def get_price_by_url(cls, url) -> int:
+        return cls.id_to_url[url]
+
+    @classmethod
+    def get_id_by_url(cls, url: str):
+        if url not in cls.url_to_id:
             cls.counter += 1
-            cls.url_to_id[list(url.keys())[0]] = cls.counter
+            cls.url_to_id[url] = cls.counter
             cls.id_to_url[cls.counter] = url
         return cls.url_to_id[url]
 
@@ -36,11 +47,10 @@ class SkinsStorage:
 
     @classmethod
     @alru_cache()
-    async def get_skin(cls, url: dict[str, int], try_=0) -> Skin:
-        url_str, price = list(url.keys())[0], list(url.values())[0]
+    async def get_skin(cls, url: str, try_=0) -> Skin:
         async with ClientSession() as session:
             try:
-                async with session.get(url_str, params={
+                async with session.get(url, params={
                     'l': 'russian'
                 }) as response:
                     soup = BeautifulSoup(await response.text())
@@ -50,7 +60,7 @@ class SkinsStorage:
                     item_name = soup.select('.market_listing_item_name')[-1].text.strip()
                     item_id = cls.get_id_by_url(url)
                     return Skin(
-                        item_id, url_str, image_src, item_name, price
+                        item_id, url, image_src, item_name, cls.get_price_by_url(url)
                     )
             except AttributeError as e:
                 if try_>5:
