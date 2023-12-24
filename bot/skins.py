@@ -30,7 +30,7 @@ class SkinsStorage:
 
     @classmethod
     def get_price_by_url(cls, url) -> int:
-        return cls.id_to_url[url]
+        return cls.url_to_price[url]
 
     @classmethod
     def get_id_by_url(cls, url: str):
