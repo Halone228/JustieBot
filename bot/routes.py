@@ -39,6 +39,7 @@ async def count_messages(message: types.Message, session: AsyncSession, *args, *
 
 
 @main_router.message(command_dialog_filter("buy_vip"))
+@main_router.callback_query(F.data == 'pod')
 async def buy_vip_menu(message: types.Message):
     builder = InlineKeyboardBuilder()
     data = {
@@ -48,7 +49,7 @@ async def buy_vip_menu(message: types.Message):
     for k,v in data.items():
         builder.row(
             InlineKeyboardButton(
-                text=f"Купон на покупку VIP-канал {v}",
+                text=f"Купон на покупку VIP-канал {v}\nЦена: 5000 баллов",
                 callback_data=f'pay-semipoints-vip-5000-{k}'
             )
         )
@@ -62,20 +63,34 @@ async def buy_vip_menu(message: types.Message):
 @session_dec
 async def start(message: types.Message, session: AsyncSession, *args, **kwargs):
     await get_or_create(message.from_user.id, session)
+    builder = InlineKeyboardBuilder()
     if message.from_user.id != message.chat.id:
         return
-    builder = InlineKeyboardBuilder()
-    for k, v in config['data']['dates'].items():
-        builder.row(InlineKeyboardButton(
-            text=k, callback_data=f"pay-text-date-{v}" # pay-vendor-action-data
-        ))
+    builder.row(
+        InlineKeyboardButton(
+            text='Подписка на VIP-канал',
+            callback_data='pod'
+        )
+    )
+    builder.row(
+        InlineKeyboardButton(
+            text='Скины',
+            callback_data='skin'
+        )
+    )
+    builder.row(
+        InlineKeyboardButton(
+            text='Информация о аккаунте',
+            callback_data='acc'
+        )
+    )
     await message.answer(
         text=config['texts']['start'],
-        reply_markup=builder.as_markup()
     )
 
 
 @main_router.message(command_dialog_filter('account'))
+@main_router.callback_query(F.data=='acc')
 @session_dec
 async def account_info(message: types.Message, session: AsyncSession, *args, **kwargs):
     print(0)
@@ -93,6 +108,7 @@ async def account_info(message: types.Message, session: AsyncSession, *args, **k
 
 
 @main_router.message(command_dialog_filter('skins'))
+@main_router.callback_query(F.data == 'skin')
 async def show_skins(message: types.Message):
     skins: dict[str, int] = config['skins']
     builder = InlineKeyboardBuilder()
