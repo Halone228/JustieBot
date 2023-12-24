@@ -94,11 +94,10 @@ async def account_info(message: types.Message, session: AsyncSession, *args, **k
 
 @main_router.message(command_dialog_filter('skins'))
 async def show_skins(message: types.Message):
-    skins: list[dict[str, int]] = config['data']['skins']
+    skins: dict[str, int] = config['skins']
     builder = InlineKeyboardBuilder()
     SkinsStorage.fill_urls(skins)
     for i in skins:
-        i = list(i.keys())[0]
         i = await SkinsStorage.get_skin(i)
         builder.row(InlineKeyboardButton(
             text=i.item_name,

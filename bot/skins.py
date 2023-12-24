@@ -24,9 +24,8 @@ class SkinsStorage:
     url_to_price = dict()
 
     @classmethod
-    def fill_urls(cls, data: list[dict[str, int]]) -> None:
-        for i in data:
-            key, value = list(i.keys())[0], list(i.values())[0]
+    def fill_urls(cls, data: dict[str, int]) -> None:
+        for key, value in data.items():
             cls.url_to_price[key] = value
 
     @classmethod
