@@ -50,8 +50,8 @@ async def buy_vip_menu(message: types.Message | types.CallbackQuery):
     }
     add_text = '\n'
     for i in data.values():
-        add_text += f'{i}: 5000 баллов'
-    for k,v in data.items():
+        add_text += f'{i}: 5000 баллов\n'
+    for k, v in data.items():
         builder.row(
             InlineKeyboardButton(
                 text=f"Купон на покупку VIP-канал {v}",
