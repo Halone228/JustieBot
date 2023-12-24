@@ -12,6 +12,7 @@ from .events import add_event
 from .vendors import VendorFactory
 from .database.methods import session_dec, increment_count, set_added, get_or_create, get_points
 from typing import Iterable
+from loguru import logger
 
 
 class ChatTypeFilter(Filter):
@@ -101,6 +102,7 @@ async def start(message: types.Message, session: AsyncSession, *args, **kwargs):
 async def account_info(message: types.Message | types.CallbackQuery, session: AsyncSession, *args, **kwargs):
     if not isinstance(message, types.Message):
         message = message.message
+    logger.debug(type(session))
     points = await get_points(session, message.from_user.id)
     mes: str = config['texts']['account']
     data = {
