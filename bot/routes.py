@@ -48,15 +48,18 @@ async def buy_vip_menu(message: types.Message | types.CallbackQuery):
         'bets': 'JastieBets',
         'sport': "JastieSport"
     }
+    add_text = '\n'
+    for i in data.values():
+        add_text += f'{i}: 5000 баллов'
     for k,v in data.items():
         builder.row(
             InlineKeyboardButton(
-                text=f"Купон на покупку VIP-канал {v}\nЦена: 5000 баллов",
+                text=f"Купон на покупку VIP-канал {v}",
                 callback_data=f'pay-semipoints-vip-5000-{k}'
             )
         )
     await message.answer(
-        text=config['texts']['buy_vip_menu'],
+        text=config['texts']['buy_vip_menu']+add_text,
         reply_markup=builder.as_markup()
     )
 
