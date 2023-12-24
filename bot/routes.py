@@ -40,7 +40,9 @@ async def count_messages(message: types.Message, session: AsyncSession, *args, *
 
 @main_router.message(command_dialog_filter("buy_vip"))
 @main_router.callback_query(F.data == 'pod')
-async def buy_vip_menu(message: types.Message):
+async def buy_vip_menu(message: types.Message | types.CallbackQuery):
+    if not isinstance(message, types.Message):
+        message = message.message
     builder = InlineKeyboardBuilder()
     data = {
         'bets': 'JastieBets',
@@ -91,9 +93,11 @@ async def start(message: types.Message, session: AsyncSession, *args, **kwargs):
 
 
 @main_router.message(command_dialog_filter('account'))
-@main_router.callback_query(F.data=='acc')
+@main_router.callback_query(F.data == 'acc')
 @session_dec
-async def account_info(message: types.Message, session: AsyncSession, *args, **kwargs):
+async def account_info(message: types.Message | types.CallbackQuery, session: AsyncSession, *args, **kwargs):
+    if not isinstance(message, types.Message):
+        message = message.message
     print(0)
     points = await get_points(session, message.from_user.id)
     mes: str = config['texts']['account']
@@ -110,7 +114,9 @@ async def account_info(message: types.Message, session: AsyncSession, *args, **k
 
 @main_router.message(command_dialog_filter('skins'))
 @main_router.callback_query(F.data == 'skin')
-async def show_skins(message: types.Message):
+async def show_skins(message: types.Message | types.CallbackQuery):
+    if not isinstance(message, types.Message):
+        message = message.message
     skins: dict[str, int] = config['skins']
     builder = InlineKeyboardBuilder()
     SkinsStorage.fill_urls(skins)
