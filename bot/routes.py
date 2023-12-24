@@ -54,7 +54,7 @@ async def buy_vip_menu(message: types.Message | types.CallbackQuery):
     for k, v in data.items():
         builder.row(
             InlineKeyboardButton(
-                text=f"Купон на покупку VIP-канал {v}",
+                text=f"Купон на покупку VIP-канал {v} <i>-50%</i>",
                 callback_data=f'pay-semipoints-vip-5000-{k}'
             )
         )
