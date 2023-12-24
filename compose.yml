@@ -1,0 +1,13 @@
+services:
+  justie_bot:
+    build: .
+    network_mode: "host"
+    volumes:
+      - .:/app/
+    environment:
+      PG_USER:
+      PG_PASSWORD":
+      PG_DB:
+      PG_HOST:
+      PG_PORT:
+      TOKEN: 

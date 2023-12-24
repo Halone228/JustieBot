@@ -1,0 +1,33 @@
+[bot]
+chat_id=-1001921297748
+[data]
+notify_delay=172800 # IN SECONDS (2 days current)
+dates = {"Месяц"=2592000}
+one_price = 1000
+skins = [
+    {'https://steamcommunity.com/market/listings/730/AK-47%20%7C%20Head%20Shot%20%28Battle-Scarred%29'=10},
+    {'https://steamcommunity.com/market/listings/730/AK-47%20%7C%20Legion%20of%20Anubis%20%28Well-Worn%29'=9},
+    {'https://steamcommunity.com/market/listings/730/StatTrak%E2%84%A2%20AWP%20%7C%20Duality%20%28Field-Tested%29'=10},
+    {'https://steamcommunity.com/market/listings/730/AWP%20%7C%20Chromatic%20Aberration%20%28Well-Worn%29'=10},
+    {'https://steamcommunity.com/market/listings/730/Desert%20Eagle%20%7C%20Conspiracy%20%28Factory%20New%29'=8},
+    {'https://steamcommunity.com/market/listings/730/M4A1-S%20%7C%20Nightmare%20%28Field-Tested%29'=10},
+    {'https://steamcommunity.com/market/listings/730/M4A4%20%7C%20Desolate%20Space%20%28Minimal%20Wear%29'=10},
+    {'https://steamcommunity.com/market/listings/730/P2000%20%7C%20Imperial%20Dragon%20%28Factory%20New%29'=10},
+    {'https://steamcommunity.com/market/listings/730/StatTrak%E2%84%A2%20Tec-9%20%7C%20Fuel%20Injector%20%28Field-Tested%29'=7},
+    {'https://steamcommunity.com/market/listings/730/USP-S%20%7C%20Cortex%20%28Minimal%20Wear%29'=4},
+    {'https://steamcommunity.com/market/listings/730/%E2%98%85%20Hand%20Wraps%20%7C%20Giraffe%20%28Field-Tested%29'=100},
+    {'https://steamcommunity.com/market/listings/730/%E2%98%85%20Hydra%20Gloves%20%7C%20Case%20Hardened%20%28Battle-Scarred%29'=100},
+    {'https://steamcommunity.com/market/listings/730/%E2%98%85%20Classic%20Knife%20%7C%20Safari%20Mesh%20%28Field-Tested%29'=120}
+]
+[texts]
+start="Приветствую в меню бота"
+kick_now="Время вышло, вы исключены из группы."
+notify_now=""
+invite_link="{link}"
+buy_vip="Хотите получить скидку на покупку VIP-канала за баллы?\n(скидка активируется сразу полсле нажатия кнопки)"
+buy_vup_button="Получить скидку N баллов"
+success="Спасибо за покупку 🤑\nПереходите к @jastie777\nИ забирай свою покупку 🔥"
+unsuccess="У вас недостаточно баллов для покупки данного товара. Увы:("
+account="Привет, {user_name}\nСчёт: {points} баллов"
+buy_vip_menu='Купить купон на VIP-канал'
+
