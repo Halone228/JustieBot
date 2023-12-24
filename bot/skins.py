@@ -24,9 +24,9 @@ class SkinsStorage:
 
     @classmethod
     def get_id_by_url(cls, url: dict[str, int]):
-        if url not in cls.url_to_id:
+        if list(url.keys())[0] not in cls.url_to_id:
             cls.counter += 1
-            cls.url_to_id[url] = cls.counter
+            cls.url_to_id[list(url.keys())[0]] = cls.counter
             cls.id_to_url[cls.counter] = url
         return cls.url_to_id[url]
 
