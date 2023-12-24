@@ -120,7 +120,7 @@ async def skin_check(callback: types.CallbackQuery):
         callback.message.delete(),
         callback.message.answer_photo(
             skin.image_src,
-            caption=skin.item_name,
+            caption=skin.item_name+f'\nЦена: {skin.price*config["data"]["one_price"]} баллов',
             reply_markup=types.InlineKeyboardMarkup(
                 inline_keyboard=[[
                     InlineKeyboardButton(
