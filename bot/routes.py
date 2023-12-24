@@ -54,7 +54,7 @@ async def buy_vip_menu(message: types.Message | types.CallbackQuery):
     for k, v in data.items():
         builder.row(
             InlineKeyboardButton(
-                text=f"Купон на покупку VIP-канал {v} <i>-50%</i>",
+                text=f"VIP-канал {v} -50%",
                 callback_data=f'pay-semipoints-vip-5000-{k}'
             )
         )
@@ -101,7 +101,6 @@ async def start(message: types.Message, session: AsyncSession, *args, **kwargs):
 async def account_info(message: types.Message | types.CallbackQuery, session: AsyncSession, *args, **kwargs):
     if not isinstance(message, types.Message):
         message = message.message
-    print(0)
     points = await get_points(session, message.from_user.id)
     mes: str = config['texts']['account']
     data = {
