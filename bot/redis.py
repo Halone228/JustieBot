@@ -1,4 +1,4 @@
-from aioredis import Redis
+from redis import Redis
 from os import getenv
 
 
