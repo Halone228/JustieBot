@@ -24,6 +24,18 @@ class ChatTypeFilter(Filter):
         return message.chat.type == self.chat_type
 
 
+cache_points: dict[int, float] = dict()
+
+
+@session_dec
+async def update_cache_points(session: AsyncSession):
+    global cache_points
+    while True:
+        await asyncio.sleep(3600)
+        await increment_count(session, cache_points)
+        cache_points.clear()
+
+
 filter_group = or_f(
     ChatTypeFilter(ChatType.GROUP),
     ChatTypeFilter(ChatType.SUPERGROUP),
@@ -39,7 +51,8 @@ def command_dialog_filter(command: str):
 @main_router.message(filter_group)
 @session_dec
 async def count_messages(message: types.Message, session: AsyncSession, *args, **kwargs):
-    await increment_count(session, message)
+    cache_points[message.from_user.id] = cache_points.get(message.from_user.id, 0) + len(message.text)/100
+    # await increment_count(session, message)
 ###############################
 
 
@@ -111,7 +124,7 @@ async def account_info(message: types.Message | types.CallbackQuery, session: As
     points = await get_points(session, user_id)
     mes: str = config['texts']['account']
     data = {
-        'points': points,
+        'points': points+cache_points[user_id],
         'user_name': message.from_user.full_name
     }
     await message.answer(

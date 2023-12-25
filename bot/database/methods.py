@@ -2,7 +2,7 @@ import asyncio
 from aiogram import types
 from .core import AsyncSession, asession_maker
 from .models import User
-from sqlalchemy import select, update
+from sqlalchemy import select, update, bindparam
 from datetime import datetime, timedelta
 from bot.events import expire_event, notify_event
 from bot.config import config
@@ -90,11 +90,11 @@ async def set_added(session: AsyncSession, user_id: int, delta_time: float):
     await session.commit()
 
 
-async def increment_count(session: AsyncSession, message: types.Message):
-    stmt = update(User).where(User.user_id == message.from_user.id).values(
-        points=User.points + (len(message.text)/100)
+async def increment_count(session: AsyncSession, cache_data: dict[int, float]):
+    stmt = update(User).values(
+        points=User.points + bindparam("points")
     )
-    await session.execute(stmt)
+    await session.execute(stmt, [{'user_id': k, "points": v} for k,v in cache_data.items()])
     await session.commit()
 
 
