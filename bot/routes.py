@@ -106,10 +106,11 @@ async def start(message: types.Message, session: AsyncSession, *args, **kwargs):
 @main_router.callback_query(F.data == 'acc')
 @session_dec
 async def account_info(message: types.Message | types.CallbackQuery, session: AsyncSession, *args, **kwargs):
+    user_id = message.from_user.id
     if not isinstance(message, types.Message):
         message = message.message
     logger.debug(type(session))
-    points = await get_points(session, message.from_user.id)
+    points = await get_points(session, user_id)
     mes: str = config['texts']['account']
     data = {
         'points': points,
