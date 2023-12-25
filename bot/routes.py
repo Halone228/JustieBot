@@ -39,8 +39,10 @@ async def update_cache_points(session: AsyncSession):
                 while cur:
                     cur, keys = await client.scan(cur, match='user:*')
                     for i in keys:
+                        i: bytes
                         await asyncio.sleep(0)
                         data = await redis_db.client.get(i)
+                        i: str = i.decode()
                         await redis_db.client.set(i, 0.)
                         cache_points[i.split(':')[1]] = data
 
