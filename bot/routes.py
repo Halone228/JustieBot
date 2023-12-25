@@ -32,7 +32,6 @@ cache_points: dict[int, float] = dict()
 async def update_cache_points(session: AsyncSession):
     while True:
         try:
-            await asyncio.sleep(30)
             cache_points = {}
             async with redis_db.client.client() as client:
                 cur = b'0'
@@ -43,9 +42,9 @@ async def update_cache_points(session: AsyncSession):
                         await asyncio.sleep(0)
                         data = await redis_db.client.get(i)
                         i: str = i.decode()
-                        await redis_db.client.set(i, 0.)
-                        cache_points[int(i.split(':')[1])] = int(data)/100
-
+                        await redis_db.client.set(i, 0)
+                        cache_points[int(i.split(':')[1])] = float(data)/100
+            await asyncio.sleep(30)
             await increment_count(session, cache_points)
             cache_points.clear()
         except Exception as e:
@@ -135,7 +134,7 @@ async def account_info(message: types.Message | types.CallbackQuery, session: As
     points = await get_points(session, user_id)
     mes: str = config['texts']['account']
     data = {
-        'points': points+(int((await redis_db.client.get(f'user:{user_id}'))/100) or '0'),
+        'points': points+(float((await redis_db.client.get(f'user:{user_id}'))/100) or '0'),
         'user_name': message.from_user.full_name
     }
     await message.answer(
