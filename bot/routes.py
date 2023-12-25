@@ -205,5 +205,6 @@ async def pay_callback(callback: types.CallbackQuery, session: AsyncSession, *ar
 @session_dec
 async def count_messages(message: types.Message, session: AsyncSession, *args, **kwargs):
     global cache_points
+    print(message.from_user.id)
     cache_points[message.from_user.id] = cache_points.get(message.from_user.id, 0) + len(message.text)/100
     # await increment_count(session, message)
