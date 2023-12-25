@@ -1,4 +1,4 @@
-from redis import Redis
+from redis.asyncio import Redis
 from os import getenv
 
 
@@ -10,5 +10,6 @@ class RedisDB:
             username=getenv("REDIS_USERNAME"),
             password=getenv("REDIS_PASSWORD")
         )
+
 
 redis_db = RedisDB()
