@@ -1,5 +1,5 @@
 [bot]
-chat_id=-1001921297748
+chat_id=-1002041612565
 [data]
 notify_delay=172800 # IN SECONDS (2 days current)
 dates = {"Месяц"=2592000}
