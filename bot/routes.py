@@ -44,7 +44,7 @@ async def update_cache_points(session: AsyncSession):
                         data = await redis_db.client.get(i)
                         i: str = i.decode()
                         await redis_db.client.set(i, 0.)
-                        cache_points[i.split(':')[1]] = int(data)/100
+                        cache_points[int(i.split(':')[1])] = int(data)/100
 
             await increment_count(session, cache_points)
             cache_points.clear()
