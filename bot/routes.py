@@ -125,7 +125,7 @@ async def account_info(message: types.Message | types.CallbackQuery, session: As
     points = await get_points(session, user_id)
     mes: str = config['texts']['account']
     data = {
-        'points': points+cache_points[user_id],
+        'points': points+cache_points.get(user_id),
         'user_name': message.from_user.full_name
     }
     await message.answer(
