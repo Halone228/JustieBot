@@ -24,7 +24,11 @@ class ChatTypeFilter(Filter):
         return message.chat.type == self.chat_type
 
 
-filter_group = or_f(ChatTypeFilter(ChatType.GROUP), ChatTypeFilter(ChatType.SUPERGROUP))
+filter_group = or_f(
+    ChatTypeFilter(ChatType.GROUP),
+    ChatTypeFilter(ChatType.SUPERGROUP),
+    ChatTypeFilter(ChatType.SENDER)
+)
 
 
 def command_dialog_filter(command: str):
@@ -35,7 +39,6 @@ def command_dialog_filter(command: str):
 @main_router.message(filter_group)
 @session_dec
 async def count_messages(message: types.Message, session: AsyncSession, *args, **kwargs):
-
     await increment_count(session, message)
 ###############################
 
