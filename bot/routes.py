@@ -12,6 +12,7 @@ from .skins import Skin, SkinsStorage
 from .vendors import VendorFactory
 from .database.methods import session_dec, increment_count, set_added, get_or_create, get_points
 from loguru import logger
+from .redis import redis_db
 
 
 MAIN_CHAT_ID = -1001743519955
@@ -27,13 +28,22 @@ class ChatTypeFilter(Filter):
 
 cache_points: dict[int, float] = dict()
 
-
 @session_dec
 async def update_cache_points(session: AsyncSession):
-    global cache_points
     while True:
         try:
             await asyncio.sleep(30)
+            cache_points = {}
+            async with redis_db.client.client() as client:
+                cur = b'0'
+                while cur:
+                    cur, keys = await client.scan(cur, match='user:*')
+                    for i in keys:
+                        await asyncio.sleep(0)
+                        data = await redis_db.client.get(i)
+                        await redis_db.client.set(i, 0.)
+                        cache_points[i.split(':')[1]] = data
+
             await increment_count(session, cache_points)
             cache_points.clear()
         except Exception as e:
@@ -120,11 +130,10 @@ async def account_info(message: types.Message | types.CallbackQuery, session: As
     user_id = message.from_user.id
     if not isinstance(message, types.Message):
         message = message.message
-    logger.debug(type(session))
     points = await get_points(session, user_id)
     mes: str = config['texts']['account']
     data = {
-        'points': points+cache_points.get(user_id, 0),
+        'points': points+float(await redis_db.client.get(f'user:{user_id}')),
         'user_name': message.from_user.full_name
     }
     await message.answer(
@@ -206,7 +215,7 @@ async def pay_callback(callback: types.CallbackQuery, session: AsyncSession, *ar
 
 @main_router.message()
 async def count_messages(message: types.Message):
-    global cache_points
-    print(message.from_user.id)
-    cache_points[message.from_user.id] = cache_points.get(message.from_user.id, 0) + len(message.text)/100
-    # await increment_count(session, message)
+    name = f"user:{message.from_user.id}"
+    if not await redis_db.client.exists(name):
+        await redis_db.client.set(name, 0.)
+    await redis_db.client.incrby(name, len(message.text)/100)

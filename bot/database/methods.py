@@ -91,10 +91,11 @@ async def set_added(session: AsyncSession, user_id: int, delta_time: float):
 
 
 async def increment_count(session: AsyncSession, cache_data: dict[int, float]):
-    stmt = update(User).where(User.user_id == bindparam('user_id')).values(
-        points=User.points + bindparam("points")
-    )
-    await session.execute(stmt, [{'user_id': k, "points": v} for k, v in cache_data.items()])
+    for k, v in cache_data.items():
+        stmt = update(User).where(User.user_id == k).values(
+            points=User.points + v
+        )
+        await session.execute(stmt)
     await session.commit()
 
 
