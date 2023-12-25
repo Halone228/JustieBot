@@ -201,7 +201,7 @@ async def pay_callback(callback: types.CallbackQuery, session: AsyncSession, *ar
         await vendor.create_transaction(session, callback)
 
 
-@main_router.message(filter_group)
+# @main_router.message(filter_group)
 @session_dec
 async def count_messages(message: types.Message, session: AsyncSession, *args, **kwargs):
     global cache_points
