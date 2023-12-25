@@ -31,7 +31,6 @@ def session_dec(func):
 
 def user_dec(func):
     @session_dec
-
     async def wrapper(message: types.Message, session: AsyncSession,  *args, **kwargs):
         return await func(
             message=message,
@@ -102,4 +101,4 @@ async def increment_count(session: AsyncSession, message: types.Message):
 async def get_points(session: AsyncSession, user_id: int):
     stmt = select(User).where(User.user_id == user_id)
     result = (await session.execute(stmt)).scalar()
-    return result.points
+    return result.points if result else 0.

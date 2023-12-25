@@ -8,11 +8,12 @@ from aiogram.enums import ChatType
 from .core import main_router, config
 from aiogram.filters import CommandStart, Command, and_f, Filter, or_f
 from .skins import Skin, SkinsStorage
-from .events import add_event
 from .vendors import VendorFactory
 from .database.methods import session_dec, increment_count, set_added, get_or_create, get_points
-from typing import Iterable
 from loguru import logger
+
+
+MAIN_CHAT_ID = -1001743519955
 
 
 class ChatTypeFilter(Filter):
@@ -20,7 +21,6 @@ class ChatTypeFilter(Filter):
         self.chat_type = chat_type
 
     async def __call__(self, message, *args, **kwargs):
-        print(message.chat.type, self.chat_type)
         return message.chat.type == self.chat_type
 
 
@@ -35,6 +35,12 @@ def command_dialog_filter(command: str):
 @main_router.message(filter_group)
 @session_dec
 async def count_messages(message: types.Message, session: AsyncSession, *args, **kwargs):
+    if message.chat.id != MAIN_CHAT_ID:
+        try:
+            await message.bot.leave_chat(message.chat.id)
+        except Exception as e:
+            logger.exception(e)
+        return
     await increment_count(session, message)
 ###############################
 
