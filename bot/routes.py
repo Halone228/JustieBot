@@ -36,7 +36,7 @@ def command_dialog_filter(command: str):
 
 
 ### Система подсчета сообщений
-@main_router.message(filter_group)
+@main_router.message()
 @session_dec
 async def count_messages(message: types.Message, session: AsyncSession, *args, **kwargs):
     await increment_count(session, message)
