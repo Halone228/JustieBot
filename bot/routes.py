@@ -117,6 +117,7 @@ async def start(message: types.Message, session: AsyncSession, *args, **kwargs):
 @main_router.callback_query(F.data == 'acc')
 @session_dec
 async def account_info(message: types.Message | types.CallbackQuery, session: AsyncSession, *args, **kwargs):
+    global cache_points
     user_id = message.from_user.id
     if not isinstance(message, types.Message):
         message = message.message
