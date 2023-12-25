@@ -35,12 +35,7 @@ def command_dialog_filter(command: str):
 @main_router.message(filter_group)
 @session_dec
 async def count_messages(message: types.Message, session: AsyncSession, *args, **kwargs):
-    if message.chat.id != MAIN_CHAT_ID:
-        try:
-            await message.bot.leave_chat(message.chat.id)
-        except Exception as e:
-            logger.exception(e)
-        return
+
     await increment_count(session, message)
 ###############################
 
