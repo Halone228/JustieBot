@@ -44,7 +44,7 @@ async def update_cache_points(session: AsyncSession):
                         data = await redis_db.client.get(i)
                         i: str = i.decode()
                         await redis_db.client.set(i, 0.)
-                        cache_points[i.split(':')[1]] = data
+                        cache_points[i.split(':')[1]] = int(data)/100
 
             await increment_count(session, cache_points)
             cache_points.clear()
@@ -135,7 +135,7 @@ async def account_info(message: types.Message | types.CallbackQuery, session: As
     points = await get_points(session, user_id)
     mes: str = config['texts']['account']
     data = {
-        'points': points+float((await redis_db.client.get(f'user:{user_id}')) or '0'),
+        'points': points+(int((await redis_db.client.get(f'user:{user_id}'))/100) or '0'),
         'user_name': message.from_user.full_name
     }
     await message.answer(
@@ -219,5 +219,5 @@ async def pay_callback(callback: types.CallbackQuery, session: AsyncSession, *ar
 async def count_messages(message: types.Message):
     name = f"user:{message.from_user.id}"
     if not await redis_db.client.exists(name):
-        await redis_db.client.set(name, 0.)
-    await redis_db.client.incrby(name, len(message.text)/100)
+        await redis_db.client.set(name, 0)
+    await redis_db.client.incrby(name, len(message.text))
