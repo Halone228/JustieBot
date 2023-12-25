@@ -1,5 +1,6 @@
 import asyncio
 
+import loguru
 from aiogram import types, F
 from aiogram.types import InlineKeyboardButton
 from aiogram.utils.keyboard import InlineKeyboardBuilder
@@ -31,10 +32,12 @@ cache_points: dict[int, float] = dict()
 async def update_cache_points(session: AsyncSession):
     global cache_points
     while True:
-        await asyncio.sleep(3600)
-        await increment_count(session, cache_points)
-        cache_points.clear()
-
+        try:
+            await asyncio.sleep(30)
+            await increment_count(session, cache_points)
+            cache_points.clear()
+        except Exception as e:
+            loguru.logger.exception(e)
 
 filter_group = or_f(
     ChatTypeFilter(ChatType.GROUP),
