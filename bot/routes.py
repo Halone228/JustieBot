@@ -133,7 +133,7 @@ async def account_info(message: types.Message | types.CallbackQuery, session: As
     points = await get_points(session, user_id)
     mes: str = config['texts']['account']
     data = {
-        'points': points+float(await redis_db.client.get(f'user:{user_id}')),
+        'points': points+float((await redis_db.client.get(f'user:{user_id}')) or '0'),
         'user_name': message.from_user.full_name
     }
     await message.answer(
