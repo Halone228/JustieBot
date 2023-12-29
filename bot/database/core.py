@@ -9,9 +9,13 @@ host = getenv("PG_HOST")
 port = getenv("PG_PORT")
 url = f"postgresql+asyncpg://{user}:{password}@{host}:{port}/{database}"
 print(url)
-engine = create_async_engine(
-    url, echo=True
-)
+
+if host is not None:
+    engine = create_async_engine(
+        url, echo=True
+    )
+else:
+    engine = None
 Base: DeclarativeBase = declarative_base()
 asession_maker: async_sessionmaker[AsyncSession] = async_sessionmaker(bind=engine)
 

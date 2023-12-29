@@ -1,6 +1,6 @@
 from .core import Base
 from datetime import datetime
-from sqlalchemy import func, BigInteger, ForeignKey
+from sqlalchemy import func, BigInteger, ForeignKey, Text
 from sqlalchemy.orm import Mapped, mapped_column
 
 
@@ -12,6 +12,23 @@ class User(Base):
     )
     points: Mapped[float] = mapped_column(
         default=0
+    )
+
+
+class UserInfo(Base):
+    __tablename__ = "user_info_table"
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey('users_table.id'),
+        primary_key=True
+    )
+    username: Mapped[str] = mapped_column(
+        Text(), nullable=True
+    )
+    first_name: Mapped[str] = mapped_column(
+        Text(), nullable=True
+    )
+    last_name: Mapped[str] = mapped_column(
+        Text(), nullable=True
     )
 
 

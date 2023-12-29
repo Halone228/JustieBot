@@ -10,7 +10,7 @@ from .core import main_router, config
 from aiogram.filters import CommandStart, Command, and_f, Filter, or_f
 from .skins import Skin, SkinsStorage
 from .vendors import VendorFactory
-from .database.methods import session_dec, increment_count, set_added, get_or_create, get_points
+from .database.methods import session_dec, increment_count, set_added, get_or_create, get_points, add_user
 from loguru import logger
 from .redis import redis_db
 
@@ -117,6 +117,7 @@ async def start(message: types.Message, session: AsyncSession, *args, **kwargs):
             callback_data='acc'
         )
     )
+    await message.answer(config['texts']['help_message'])
     await message.answer(
         text=config['texts']['start'],
         reply_markup=builder.as_markup()
@@ -215,7 +216,20 @@ async def pay_callback(callback: types.CallbackQuery, session: AsyncSession, *ar
 
 
 @main_router.message()
-async def count_messages(message: types.Message):
+@session_dec
+async def count_messages(message: types.Message, session: AsyncSession, *args, **kwargs):
+    if message.new_chat_members:
+        await message.answer(config['texts']['help_message'])
+
+        for user in message.new_chat_members:
+            await add_user(
+                session,
+                user.id,
+                username=user.username,
+                first_name=user.first_name,
+                last_name=user.last_name
+            )
+        return
     name = f"user:{message.from_user.id}"
     if not await redis_db.client.exists(name):
         await redis_db.client.set(name, 0)

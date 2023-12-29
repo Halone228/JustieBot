@@ -1,7 +1,7 @@
 import asyncio
 from aiogram import types
 from .core import AsyncSession, asession_maker
-from .models import User
+from .models import User, UserInfo, Users
 from sqlalchemy import select, update, bindparam
 from datetime import datetime, timedelta
 from bot.events import expire_event, notify_event
@@ -103,3 +103,22 @@ async def get_points(session: AsyncSession, user_id: int):
     stmt = select(User).where(User.user_id == user_id)
     result = (await session.execute(stmt)).scalar()
     return result.points if result else 0.
+
+
+async def add_user(
+        session: AsyncSession,
+        user_id: int,
+        first_name: str,
+        last_name: str,
+        username: str
+):
+    session.add(Users(id=user_id))
+    try:
+        await session.commit()
+    except:
+        pass
+    session.add(Users(user_id=user_id, first_name=first_name, last_name=last_name, username=username))
+    try:
+        await session.commit()
+    except:
+        pass
