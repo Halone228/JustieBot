@@ -95,7 +95,7 @@ async def buy_vip_menu(message: types.Message | types.CallbackQuery):
 @main_router.message(command_dialog_filter('start'))
 @session_dec
 async def start(message: types.Message, session: AsyncSession, *args, **kwargs):
-    await get_or_create(message.from_user.id, session)
+    await get_or_create(message, session)
     builder = InlineKeyboardBuilder()
     if message.from_user.id != message.chat.id:
         return

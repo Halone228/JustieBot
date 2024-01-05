@@ -9,13 +9,18 @@ from bot.config import config
 from functools import wraps
 
 
-async def get_or_create(user_id: int, session: AsyncSession) -> User:
-    stmt = select(User).where(User.user_id == user_id)
+async def get_or_create(message: types.Message, session: AsyncSession) -> User:
+    stmt = select(Users).where(Users.id == message.from_user.id)
     result = await session.execute(stmt)
     result = result.scalar()
     if not result:
-        result = User(user_id=user_id)
-        session.add(result)
+        await add_user(
+            session,
+            user_id=message.from_user.id,
+            username=message.from_user.username,
+            first_name=message.from_user.first_name,
+            last_name=message.from_user.last_name
+        )
         await session.commit()
     return result
 
@@ -117,7 +122,7 @@ async def add_user(
         await session.commit()
     except:
         pass
-    session.add(Users(user_id=user_id, first_name=first_name, last_name=last_name, username=username))
+    session.add(UserInfo(user_id=user_id, first_name=first_name, last_name=last_name, username=username))
     try:
         await session.commit()
     except:
