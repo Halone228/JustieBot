@@ -5,9 +5,13 @@ services:
     volumes:
       - .:/app/
     environment:
-      PG_USER:
-      PG_PASSWORD:
-      PG_DB:
-      PG_HOST:
-      PG_PORT:
-      TOKEN:
+      PG_USER: "gen_user"
+      PG_PASSWORD: "JZ6_M9ciDeDSR="
+      PG_DB: "default_db"
+      PG_HOST: "194.35.116.245"
+      PG_PORT: "5432"
+      REDIS_HOST: "95.140.156.254"
+      REDIS_USERNAME: "default"
+      REDIS_PORT: "6379"
+      REDIS_PASSWORD: "\gMA2Ic\&t72VA"
+      TOKEN: "6619062467:AAFmkEnzZH5uwYv4D4ZBrqfNRzMzgevgqoA"
