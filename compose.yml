@@ -11,15 +11,3 @@ services:
       PG_HOST:
       PG_PORT:
       TOKEN:
-  development:
-    build: .
-    network_mode: "host"
-    volumes:
-      - .:/app/
-    environment:
-      PG_USER: "postgres"
-      PG_PASSWORD: "postgres"
-      PG_DB: "bot_model"
-      PG_HOST: "localhost"
-      PG_PORT: "5432"
-      TOKEN: "5806081570:AAHY0broTQLAVj7xkiw8GAwWmDAVuDXRy2A"
