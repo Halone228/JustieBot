@@ -54,7 +54,7 @@ class SkinsStorage:
     @classmethod
     @alru_cache()
     async def get_skin(cls, url: str, try_=0) -> Skin:
-        data: bytes | None = await redis_db.client.hmget(f'skin_data:{url}')
+        data: bytes | None = await redis_db.client.get(f'skin_data:{url}')
         if data is not None:
             data: Skin = loads(data)
             cls.url_to_price[url] = data.price
