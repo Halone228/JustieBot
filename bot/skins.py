@@ -58,7 +58,7 @@ class SkinsStorage:
         if data is not None:
             data: Skin = loads(data)
             cls.url_to_price[url] = data.price
-            cls.id_to_url[data.id] = data.price
+            cls.id_to_url[data.id] = data.url
             return data
         async with ClientSession() as session:
             try:
