@@ -75,6 +75,7 @@ class SkinsStorage:
                         item_id, url, image_src, item_name, cls.get_price_by_url(url)
                     )
                     await redis_db.client.set(f'skin_data:{url}', dumps(new_skin))
+                    return new_skin
             except AttributeError as e:
                 if try_ > 5:
                     return Skin(0,'','','')
