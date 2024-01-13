@@ -150,11 +150,22 @@ async def account_info(message: types.Message | types.CallbackQuery, session: As
 async def show_skins(message: types.Message | types.CallbackQuery):
     if not isinstance(message, types.Message):
         message = message.message
-    skins: dict[str, int] = config['skins']
+    skins: dict[str, float] = {}
+    cur = b'0'
+    async with redis_db.client.client() as client:
+        while cur:
+            cur, keys = await client.scan(cur, match='skin:*')
+            for i in keys:
+                i: bytes
+                data = await client.get(i)
+                key = i.decode().replace('skin:', '')
+                data = float(data)
+                skins[key] = data
+
     builder = InlineKeyboardBuilder()
     SkinsStorage.fill_urls(skins)
     for i in skins:
-        i = await SkinsStorage.get_skin(i)
+        i: Skin = await SkinsStorage.get_skin(i)
         builder.row(InlineKeyboardButton(
             text=i.item_name,
             callback_data=f'skin-{i.id}'

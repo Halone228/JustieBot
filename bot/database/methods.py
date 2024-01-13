@@ -7,6 +7,7 @@ from datetime import datetime, timedelta
 from bot.events import expire_event, notify_event
 from bot.config import config
 from functools import wraps
+from sqlalchemy.dialects.postgresql import insert
 
 
 async def get_or_create(message: types.Message, session: AsyncSession) -> User:
@@ -117,13 +118,19 @@ async def add_user(
         last_name: str,
         username: str
 ):
-    session.add(Users(id=user_id))
-    try:
-        await session.commit()
-    except:
-        pass
-    session.add(UserInfo(user_id=user_id, first_name=first_name, last_name=last_name, username=username))
-    try:
-        await session.commit()
-    except:
-        pass
+    stmt1 = insert(Users).values(
+        user_id=user_id
+    ).on_conflict_do_nothing()
+    stmt2 = insert(UserInfo).values(
+        user_id=user_id,
+        first_name=first_name,
+        last_name=last_name,
+        username=username
+    ).on_conflict_do_nothing()
+    stmt3 = insert(User).values(
+        user_id=user_id
+    ).on_conflict_do_nothing()
+    await session.execute(stmt1)
+    await session.execute(stmt2)
+    await session.execute(stmt3)
+    await session.commit()
