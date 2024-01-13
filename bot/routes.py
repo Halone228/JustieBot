@@ -151,7 +151,7 @@ async def show_skins(message: types.Message | types.CallbackQuery):
     if not isinstance(message, types.Message):
         message = message.message
     skins: dict[str, float] = {}
-    await message.answer('Получаем информацию о скинах...')
+    new_message = await message.answer('Получаем информацию о скинах...')
     cur = b'0'
     async with redis_db.client.client() as client:
         while cur:
@@ -171,6 +171,7 @@ async def show_skins(message: types.Message | types.CallbackQuery):
             text=i.item_name,
             callback_data=f'skin-{i.id}'
         ))
+    await new_message.delete()
     await message.answer(
         text='Купить скины за баллы',
         reply_markup=builder.as_markup()
