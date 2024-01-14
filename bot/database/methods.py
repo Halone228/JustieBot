@@ -1,13 +1,14 @@
 import asyncio
 from aiogram import types
 from .core import AsyncSession, asession_maker
-from .models import User, UserInfo, Users
+from .models import User, UserInfo, Users, Referrers
 from sqlalchemy import select, update, bindparam
 from datetime import datetime, timedelta
 from bot.events import expire_event, notify_event
 from bot.config import config
 from functools import wraps
 from sqlalchemy.dialects.postgresql import insert
+from bot.redis import redis_db
 
 
 async def get_or_create(message: types.Message, session: AsyncSession) -> User:
@@ -86,6 +87,44 @@ async def set_expired(session: AsyncSession, user_id: int):
     await session.commit()
 
 
+async def add_referrer(session: AsyncSession, user_id: int, referrer_id: int) -> 0 | -1 | 1:
+    """
+    -1 - not found referrer
+    0 - has referrer
+    1 - success
+    :param session:
+    :param user_id:
+    :param referrer_id:
+    :return:
+    """
+    stmt = select(UserInfo).where(
+        UserInfo.user_id == user_id
+    )
+    stmt_referrer = select(Users).where(
+        Users.id == referrer_id
+    )
+    _res = await session.execute(stmt)
+    _res_ref = await session.execute(stmt_referrer)
+    result = _res.scalar()
+    res_ref = _res_ref.scalar()
+    if res_ref is None:
+        return -1
+    if result.referrer is None:
+        stmt1 = update(UserInfo).where(UserInfo.user_id == user_id).values(
+            referrer=referrer_id
+        )
+        stmt2 = insert(Referrers).values(
+            referrer_id=referrer_id,
+            referral_id=user_id
+        )
+        await session.execute(stmt1)
+        await session.execute(stmt2)
+        await session.commit()
+        return 1
+    else:
+        return 0
+
+
 async def set_added(session: AsyncSession, user_id: int, delta_time: float):
     stmt = update(User).where(User.user_id == user_id).values(
         in_group=True,
@@ -97,10 +136,20 @@ async def set_added(session: AsyncSession, user_id: int, delta_time: float):
 
 
 async def increment_count(session: AsyncSession, cache_data: dict[int, float]):
+    percent = float(await redis_db.client.get('referer_percent'))
     for k, v in cache_data.items():
         stmt = update(User).where(User.user_id == k).values(
             points=User.points + v
         )
+        sstmt = select(UserInfo).where(UserInfo.user_id == k)
+        res = (await session.execute(sstmt)).scalar()
+        if res.referrer:
+            stmt2 = update(User).where(
+                User.user_id == res.referrer
+            ).values(
+                points=User.points + percent*v
+            )
+            await session.execute(stmt2)
         await session.execute(stmt)
     await session.commit()
 

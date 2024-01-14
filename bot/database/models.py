@@ -30,6 +30,10 @@ class UserInfo(Base):
     last_name: Mapped[str] = mapped_column(
         Text(), nullable=True
     )
+    referrer: Mapped[int] = mapped_column(
+        ForeignKey('users_table.id'),
+        nullable=True
+    )
 
 
 class Users(Base):
@@ -37,4 +41,15 @@ class Users(Base):
     id: Mapped[int] = mapped_column(
         BigInteger(),
         primary_key=True
+    )
+
+
+class Referrers(Base):
+    __tablename__ = "referrers_table"
+    referrer_id: Mapped[int] = mapped_column(
+        ForeignKey('users_table.id'),
+        primary_key=True
+    )
+    referral_id: Mapped[int] = mapped_column(
+        ForeignKey('users_table.id')
     )

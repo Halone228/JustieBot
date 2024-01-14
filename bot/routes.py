@@ -10,7 +10,7 @@ from .core import main_router, config
 from aiogram.filters import CommandStart, Command, and_f, Filter, or_f
 from .skins import Skin, SkinsStorage
 from .vendors import VendorFactory
-from .database.methods import session_dec, increment_count, set_added, get_or_create, get_points, add_user
+from .database.methods import session_dec, increment_count, set_added, get_or_create, get_points, add_user, add_referrer
 from loguru import logger
 from .redis import redis_db
 
@@ -176,6 +176,26 @@ async def show_skins(message: types.Message | types.CallbackQuery):
         text='Купить скины за баллы',
         reply_markup=builder.as_markup()
     )
+
+
+@main_router.message(command_dialog_filter('ref'))
+@session_dec
+async def ref(message: types.Message, session: AsyncSession, *args, **kwargs):
+    args = message.text.split(' ')
+    if len(args) == 2:
+        try:
+            referrer_id = int(args[1])
+            res = await add_referrer(session, message.from_user.id, referrer_id)
+        except ValueError:
+            res = -1
+        if res == -1:
+            await message.answer('Неверно указан рефер!')
+        if res == 0:
+            await message.answer('У вас уже есть рефер...')
+        if res == 1:
+            await message.answer('Вы успешно стали рефералом!')
+    else:
+        await message.answer()
 
 
 @main_router.callback_query(F.data.startswith('skin'))
