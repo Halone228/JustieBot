@@ -199,7 +199,7 @@ async def ref(message: types.Message, session: AsyncSession, *args, **kwargs):
         message_text: str = config['texts']['ref_message']
         message_text = message_text.format_map({
             'user_id': message.from_user.id,
-            'refs_cnt': get_referrals(session, message.from_user.id)
+            'refs_cnt': await get_referrals(session, message.from_user.id)
         })
         await message.answer(message_text)
 
