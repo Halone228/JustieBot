@@ -65,7 +65,7 @@ class TextVendor(BaseVendor):
 class SemiPointsVendor(BaseVendor):
     def __init__(self, user: types.User, action: str, data: Any):
         points, data = data.split('-')
-        self.points = int(points)
+        self.points = float(points)
         super().__init__(
             user,
             action,
