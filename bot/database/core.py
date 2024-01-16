@@ -12,7 +12,7 @@ print(url)
 
 if host is not None:
     engine = create_async_engine(
-        url, echo=True
+        url
     )
 else:
     engine = None
