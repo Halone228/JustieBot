@@ -176,7 +176,7 @@ async def add_user(
         username: str
 ):
     stmt1 = insert(Users).values(
-        user_id=user_id
+        id=user_id
     ).on_conflict_do_nothing()
     stmt2 = insert(UserInfo).values(
         user_id=user_id,
