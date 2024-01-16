@@ -10,7 +10,8 @@ from .core import main_router, config
 from aiogram.filters import CommandStart, Command, and_f, Filter, or_f
 from .skins import Skin, SkinsStorage
 from .vendors import VendorFactory
-from .database.methods import session_dec, increment_count, set_added, get_or_create, get_points, add_user, add_referrer
+from .database.methods import session_dec, increment_count, set_added, get_or_create, get_points, add_user, \
+    add_referrer, get_referrals
 from loguru import logger
 from .redis import redis_db
 
@@ -195,7 +196,12 @@ async def ref(message: types.Message, session: AsyncSession, *args, **kwargs):
         if res == 1:
             await message.answer('Вы успешно стали рефералом!')
     else:
-        await message.answer()
+        message_text: str = config['texts']['ref_message']
+        message_text = message_text.format_map({
+            'user_id': message.from_user.id,
+            'refs_cnt': get_referrals(session, message.from_user.id)
+        })
+        await message.answer(message_text)
 
 
 @main_router.callback_query(F.data.startswith('skin'))

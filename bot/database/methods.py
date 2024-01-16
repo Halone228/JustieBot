@@ -2,7 +2,7 @@ import asyncio
 from aiogram import types
 from .core import AsyncSession, asession_maker
 from .models import User, UserInfo, Users, Referrers
-from sqlalchemy import select, update, bindparam
+from sqlalchemy import select, update, bindparam, func
 from datetime import datetime, timedelta
 from bot.events import expire_event, notify_event
 from bot.config import config
@@ -123,6 +123,14 @@ async def add_referrer(session: AsyncSession, user_id: int, referrer_id: int) ->
         return 1
     else:
         return 0
+
+
+async def get_referrals(session: AsyncSession, user_id: int):
+    stmt = select(func.count()).select_from(Referrers).where(
+        Referrers.referrer_id == user_id
+    )
+    res = await session.execute(stmt)
+    return res.scalar()
 
 
 async def set_added(session: AsyncSession, user_id: int, delta_time: float):

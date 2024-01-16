@@ -21,12 +21,12 @@ depends_on: Union[str, Sequence[str], None] = None
 def upgrade() -> None:
     op.add_column(
         'user_info_table',
-        sa.Column('referrer', sa.ForeignKey('users_table.id'))
+        sa.Column('referrer', sa.BigInteger(), sa.ForeignKey('users_table.id'), nullable=True)
     )
     op.create_table(
         'referrers_table',
-        sa.Column('referrer_id', sa.ForeignKey('users_table.id'), primary_key=True, nullable=True),
-        sa.Column('referral_id', sa.ForeignKey('users_table.id'))
+        sa.Column('referrer_id', sa.BigInteger(), sa.ForeignKey('users_table.id'), primary_key=True),
+        sa.Column('referral_id', sa.BigInteger(), sa.ForeignKey('users_table.id'))
     )
 
 
