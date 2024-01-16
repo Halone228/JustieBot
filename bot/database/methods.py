@@ -144,7 +144,7 @@ async def set_added(session: AsyncSession, user_id: int, delta_time: float):
 
 
 async def increment_count(session: AsyncSession, cache_data: dict[int, float]):
-    percent = float(await redis_db.client.get('referer_percent'))
+    percent = float(await redis_db.client.get('referrer_percent'))
     for k, v in cache_data.items():
         stmt = update(User).where(User.user_id == k).values(
             points=User.points + v
