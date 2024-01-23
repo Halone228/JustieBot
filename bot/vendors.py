@@ -13,7 +13,7 @@ from .events import add_event
 from .config import config
 from .skins import SkinsStorage, Skin
 
-ADMIN_CHAT = int(2041612565)
+ADMIN_CHAT = int(-1002041612565)
 
 
 class BaseVendor(ABC):
