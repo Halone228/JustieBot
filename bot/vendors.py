@@ -105,13 +105,13 @@ class PointsVendor(SemiPointsVendor):
         stmt = update(User).where(User.user_id == self.user.id).values(
             points=User.points-self.points
         )
-        item = await SkinsStorage.get_skin(SkinsStorage.get_url_by_id(int(self.data)))
+        item: Skin = await SkinsStorage.get_skin(SkinsStorage.get_url_by_id(int(self.data)))
         await session.execute(stmt)
         await session.commit()
         await self.user.bot.send_message(
             ADMIN_CHAT,
             f"Покупка скина пользователем @{self.user.username} ({self.user.full_name}\n"
-            f"Скин {item['name']}, <a href='{item['tp_url']}'>ТП</a>"
+            f"Скин {item.item_name}, <a href='{item.url}'>ТП</a>"
         )
 
 
