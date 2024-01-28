@@ -1,7 +1,7 @@
 import asyncio
 from aiogram import types
 from .core import AsyncSession, asession_maker
-from .models import User, UserInfo, Users, Referrers
+from .models import User, UserInfo, Users, Referrers, Matches, Bids
 from sqlalchemy import select, update, bindparam, func
 from datetime import datetime, timedelta
 from bot.events import expire_event, notify_event
@@ -191,3 +191,52 @@ async def add_user(
     await session.execute(stmt2)
     await session.execute(stmt3)
     await session.commit()
+
+
+async def get_active_matches(session: AsyncSession):
+    stmt = select(Matches).where(
+        ~Matches.ended
+    )
+    result = (await session.execute(stmt)).scalars()
+    return result
+
+
+async def can_bet(
+    session: AsyncSession,
+    match_id: int,
+    user_id: int
+):
+    stmt_exists = select(Bids).where(
+        Bids.user_id == user_id
+    )
+    if (await session.execute(stmt_exists)).scalar():
+        return False
+    return True
+
+
+async def set_bid_for_match(
+    session: AsyncSession,
+    match_id: int,
+    user_id: int,
+    bid: float
+):
+    if not await can_bet(session, match_id, user_id):
+        return False
+    new_bid = Bids(match_id=match_id, user_id=user_id, bid=bid)
+    session.add(new_bid)
+    await session.commit()
+    return new_bid
+
+
+async def get_user_points(
+    session: AsyncSession,
+    user_id: int
+):
+    stmt = select(User).where(
+        User.user_id == user_id
+    )
+    res = await session.execute(stmt)
+    res = res.scalar()
+    if res:
+        return res.points
+    return None

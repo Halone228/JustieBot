@@ -53,3 +53,36 @@ class Referrers(Base):
     referral_id: Mapped[int] = mapped_column(
         ForeignKey('users_table.id')
     )
+
+
+class Matches(Base):
+    __tablename__ = "matches_table"
+    id: Mapped[int] = mapped_column(
+        autoincrement=True,
+        primary_key=True
+    )
+    first_opponent: Mapped[str]
+    second_opponent: Mapped[str]
+    match_name: Mapped[str]
+    ended: Mapped[bool] = mapped_column(
+        default=False
+    )
+    first_coff: Mapped[float]
+    second_coff: Mapped[float]
+    first_win: Mapped[bool] = mapped_column(
+        nullable=True
+    )
+    end_time: Mapped[datetime]
+
+
+class Bids(Base):
+    __tablename__ = 'bids_table'
+    match_id: Mapped[int] = mapped_column(
+        ForeignKey(f'{Matches.__tablename__}.id'),
+        primary_key=True
+    )
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey(f'{Users.__tablename__}.id'),
+        primary_key=True
+    )
+    bid: Mapped[float]

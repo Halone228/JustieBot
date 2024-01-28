@@ -12,7 +12,8 @@ print(url)
 
 if host is not None:
     engine = create_async_engine(
-        url
+        url,
+        expire_on_commit=False
     )
 else:
     engine = None
