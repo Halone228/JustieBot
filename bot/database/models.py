@@ -74,6 +74,9 @@ class Matches(Base):
     )
     end_time: Mapped[datetime]
 
+    def __repr__(self):
+        return f'{self.id} | {self.match_name} | {self.first_coff:.2f}:{self.second_coff:.2f}'
+
 
 class Bids(Base):
     __tablename__ = 'bids_table'

@@ -10,8 +10,17 @@ from .core import main_router, config
 from aiogram.filters import CommandStart, Command, and_f, Filter, or_f
 from .skins import Skin, SkinsStorage
 from .vendors import VendorFactory
-from .database.methods import session_dec, increment_count, set_added, get_or_create, get_points, add_user, \
-    add_referrer, get_referrals
+from .database.methods import (
+    session_dec,
+    increment_count,
+    set_added,
+    get_or_create,
+    get_points,
+    add_user,
+    add_referrer,
+    get_referrals,
+    get_active_matches
+)
 from loguru import logger
 from .redis import redis_db
 
@@ -273,3 +282,23 @@ async def count_messages(message: types.Message, session: AsyncSession, *args, *
     if not await redis_db.client.exists(name):
         await redis_db.client.set(name, 0)
     await redis_db.client.incrby(name, len(message.text))
+
+
+@main_router.message(command_dialog_filter('/bets'))
+@main_router.callback_query(F.data.startswith('bets'))
+@session_dec
+async def show_matches(message: types.Message | types.CallbackQuery, session: AsyncSession, *args, **kwargs):
+    if isinstance(message, types.CallbackQuery):
+        message = message.message
+    matches = await get_active_matches(session)
+    result_string = "\n".join(repr(mat) for mat in matches) if matches else "Нет активных матчей"
+    help_string = ("Для того чтобы сделать ставку, нужно использовать команду "
+                   "/bet <Номер матча> <Ставка в баллах>\nПример: /bet 5 500")
+    result_string += '\n' + help_string
+    await message.answer(result_string)
+
+
+@main_router.message(command_dialog_filter('/bet'))
+@session_dec
+async def set_bet(message: types.Message, session: AsyncSession, *args, **kwargs):
+    pass
