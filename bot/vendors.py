@@ -1,11 +1,14 @@
 import asyncio
 import datetime
 from typing import Any, Callable, Type, Callable
+
+import loguru
 from aiofiles import open
 from abc import ABC, abstractmethod
 from aiogram import types
 from uuid import uuid4
 from sqlalchemy import select, update
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.ext.asyncio import AsyncSession
 from os import getenv
 from .database.methods import session_dec, User, get_user_points, can_bet, set_bid_for_match
@@ -126,18 +129,19 @@ class BidsVendor(BaseVendor):
     async def check_action(self, session: AsyncSession) -> bool:
         points: float = await get_user_points(session, self.user.id)
 
-        return points < self.points and await can_bet(session, self.match_id, self.user.id)
+        return points > self.points and (await can_bet(session, self.match_id, self.user.id))[0]
 
     async def create_transaction(self, session: AsyncSession = None, callback_success: Callable = None):
         await set_bid_for_match(
             session,
             self.match_id,
-            self.user.id
+            self.user.id,
+            self.points
         )
 
     async def get_message(self, session: AsyncSession = None) -> str | tuple[str, bool]:
         check = await self.check_action(session)
-        text = "Ставка успешно создана!" if check else "Недостаточно средств, либо ставка на этот матч уже существует."
+        text = "Ставка успешно создана!" if check else "Недостаточно средств."
         return text, check
 
 

@@ -19,7 +19,7 @@ from .database.methods import (
     add_user,
     add_referrer,
     get_referrals,
-    get_active_matches
+    get_active_matches, can_bet, set_bid_for_match, get_match, get_user_bids
 )
 from loguru import logger
 from .redis import redis_db
@@ -253,14 +253,83 @@ async def pay_callback(callback: types.CallbackQuery, session: AsyncSession, *ar
         action=action,
         data=data
     )
-    us_id = callback.from_user.id
     message = await vendor.get_message(session)
     await callback.message.answer(message[0])
-
-    async def callback():
-        return
     if message[1]:
-        await vendor.create_transaction(session, callback)
+        await vendor.create_transaction(session, None)
+    await callback.message.delete()
+
+
+@main_router.message(command_dialog_filter('bets'))
+@main_router.callback_query(F.data.startswith('bets'))
+@session_dec
+async def show_matches(message: types.Message | types.CallbackQuery, session: AsyncSession, *args, **kwargs):
+    if isinstance(message, types.CallbackQuery):
+        message = message.message
+    matches = await get_active_matches(session)
+    data = [i for i in matches]
+    builder = InlineKeyboardBuilder()
+    builder.row(InlineKeyboardButton(
+        text='Посмотреть свои ставки',
+        callback_data='view-bids'
+    ))
+    result_string = "\n".join(repr(mat) for mat in data) if len(data) else "Нет активных матчей"
+    help_string = ("Для того чтобы сделать ставку, нужно использовать команду "
+                   "/bet <code>{Номер матча}</code> <code>{Ставка в баллах}</code>\nПример: /bet 5 500")
+    result_string += '\n' + help_string
+    await message.answer(result_string, reply_markup=builder.as_markup())
+
+
+@main_router.callback_query(F.data == 'view-bids')
+@session_dec
+async def view_bets(callback: types.CallbackQuery, session: AsyncSession, *args, **kwargs):
+    matches = await get_user_bids(session, callback.from_user.id)
+    data = [i for i in matches]
+
+    message = '\n'.join((f'{idx}. ' + i.get_info() for idx, i in enumerate(data, start=1))) if data else "У вас нет активных ставок"
+    message = 'Вот ваши активные ставки:\n' + message
+    await callback.message.answer(message)
+
+
+@main_router.message(command_dialog_filter('bet'))
+@session_dec
+async def set_bet(message: types.Message, session: AsyncSession, *args, **kwargs):
+    _, match_id, price, *args = message.text.split(' ')
+    price = price.replace(',', '.')
+    if len(args) > 0:
+        await message.answer("Неверный формат введёных данных")
+    try:
+        match_id = int(match_id)
+    except ValueError:
+        await message.answer('Номер матча должен быть числом')
+    try:
+        price = float(price)
+    except ValueError:
+        await message.answer("Неверный формат количества баллов(формат должен быть действительным числом)")
+    answers = {
+        0: '',
+        -1: 'Нет такого матча.',
+        -2: 'Матч уже завершёню',
+        -3: 'Время ставок на матч уже закончилось!',
+        -4: 'Ставка на этот матч уже присутсвует.'
+    }
+    can = await can_bet(session, match_id, message.from_user.id)
+    answer = answers[can[1]]
+    if can[0]:
+        match = await get_match(session, match_id)
+        keyboard_b = InlineKeyboardBuilder()
+        keyboard_b.row(
+            InlineKeyboardButton(
+                text='Сделать ставку!',
+                callback_data=f'pay-bid-set-{price}-{match_id}'
+            )
+        )
+        await message.answer(
+            f'{repr(match)}\nСтавка: {price}',
+            reply_markup=keyboard_b.as_markup()
+        )
+    else:
+        await message.answer(answer)
 
 
 @main_router.message()
@@ -281,24 +350,5 @@ async def count_messages(message: types.Message, session: AsyncSession, *args, *
     name = f"user:{message.from_user.id}"
     if not await redis_db.client.exists(name):
         await redis_db.client.set(name, 0)
-    await redis_db.client.incrby(name, len(message.text))
-
-
-@main_router.message(command_dialog_filter('/bets'))
-@main_router.callback_query(F.data.startswith('bets'))
-@session_dec
-async def show_matches(message: types.Message | types.CallbackQuery, session: AsyncSession, *args, **kwargs):
-    if isinstance(message, types.CallbackQuery):
-        message = message.message
-    matches = await get_active_matches(session)
-    result_string = "\n".join(repr(mat) for mat in matches) if matches else "Нет активных матчей"
-    help_string = ("Для того чтобы сделать ставку, нужно использовать команду "
-                   "/bet <Номер матча> <Ставка в баллах>\nПример: /bet 5 500")
-    result_string += '\n' + help_string
-    await message.answer(result_string)
-
-
-@main_router.message(command_dialog_filter('/bet'))
-@session_dec
-async def set_bet(message: types.Message, session: AsyncSession, *args, **kwargs):
-    pass
+    await redis_db.client.incrby(name,
+                                 len(message.text) if message.text else message.caption if message.caption else 0)

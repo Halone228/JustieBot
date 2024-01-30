@@ -13,12 +13,15 @@ print(url)
 if host is not None:
     engine = create_async_engine(
         url,
-        expire_on_commit=False
+        # echo=True
     )
 else:
     engine = None
 Base: DeclarativeBase = declarative_base()
-asession_maker: async_sessionmaker[AsyncSession] = async_sessionmaker(bind=engine)
+asession_maker: async_sessionmaker[AsyncSession] = async_sessionmaker(
+    bind=engine,
+    expire_on_commit=False
+)
 
 
 async def create_tables():

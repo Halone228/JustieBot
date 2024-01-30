@@ -1,7 +1,7 @@
 from .core import Base
 from datetime import datetime
 from sqlalchemy import func, BigInteger, ForeignKey, Text
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 
 class User(Base):
@@ -73,6 +73,9 @@ class Matches(Base):
         nullable=True
     )
     end_time: Mapped[datetime]
+    bids: Mapped['Bids'] = relationship(
+        back_populates='match'
+    )
 
     def __repr__(self):
         return f'{self.id} | {self.match_name} | {self.first_coff:.2f}:{self.second_coff:.2f}'
@@ -89,3 +92,10 @@ class Bids(Base):
         primary_key=True
     )
     bid: Mapped[float]
+    match: Mapped[Matches] = relationship(
+        back_populates='bids',
+        lazy='selectin'
+    )
+
+    def get_info(self):
+        return f'{self.match.match_name} | {self.bid}'

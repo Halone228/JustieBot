@@ -1,4 +1,6 @@
 import asyncio
+
+import loguru
 from aiogram import types
 from .core import AsyncSession, asession_maker
 from .models import User, UserInfo, Users, Referrers, Matches, Bids
@@ -201,17 +203,34 @@ async def get_active_matches(session: AsyncSession):
     return result
 
 
+async def get_match(session: AsyncSession, match_id: int):
+    stmt = select(Matches).where(
+        Matches.id == match_id
+    )
+    return (await session.execute(stmt)).scalar()
+
+
 async def can_bet(
     session: AsyncSession,
     match_id: int,
     user_id: int
 ):
+    stmt_match = select(Matches).where(
+        Matches.id == match_id
+    )
+    match = (await session.execute(stmt_match)).scalar()
+    if not match:
+        return False, -1
+    if match.ended:
+        return False, -2
+    if match.end_time < datetime.now():
+        return False, -3
     stmt_exists = select(Bids).where(
-        Bids.user_id == user_id
+        Bids.user_id == user_id and Bids.match_id == match_id
     )
     if (await session.execute(stmt_exists)).scalar():
-        return False
-    return True
+        return False, -4
+    return True, 0
 
 
 async def set_bid_for_match(
@@ -220,12 +239,18 @@ async def set_bid_for_match(
     user_id: int,
     bid: float
 ):
-    if not await can_bet(session, match_id, user_id):
-        return False
-    new_bid = Bids(match_id=match_id, user_id=user_id, bid=bid)
-    session.add(new_bid)
+    stmt1 = insert(Bids).values(
+        match_id=match_id,
+        user_id=user_id,
+        bid=bid
+    ).returning(Bids)
+    stmt = update(User).where(User.user_id == user_id).values(
+        points=User.points - bid
+    )
+    await session.execute(stmt)
+    data = await session.execute(stmt1)
     await session.commit()
-    return new_bid
+    return data.scalar()
 
 
 async def get_user_points(
@@ -240,3 +265,14 @@ async def get_user_points(
     if res:
         return res.points
     return None
+
+
+async def get_user_bids(
+    session: AsyncSession,
+    user_id: int
+):
+    stmt = select(Bids).where(
+        Bids.user_id == user_id
+    )
+    res = await session.execute(stmt)
+    return res.scalars()
