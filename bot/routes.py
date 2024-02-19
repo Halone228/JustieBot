@@ -38,6 +38,7 @@ class ChatTypeFilter(Filter):
 
 cache_points: dict[int, float] = dict()
 
+
 @session_dec
 async def update_cache_points(session: AsyncSession):
     while True:
